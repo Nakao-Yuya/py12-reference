@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PY12 リファレンス</title>
+<link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+<header class="top"><div class="in"><h1>PY12 リファレンス</h1></div></header>
+<nav class="toc" aria-label="section を選ぶ"><div class="in" role="tablist"><a href="#s01" role="tab">section01</a><a href="#s02" role="tab">section02</a><a href="#s03" role="tab">section03</a><a href="#s04" role="tab">section04</a><a href="#errors" role="tab">エラー早見表</a></div></nav>
+<main>
+
+<section class="secblk" id="s01">
+  <header><span class="no">section01</span><h2>環境構築・最小アプリ</h2></header>
+  <a class="vizcard" href="s01-02.html"><span class="ic" aria-hidden="true">▶</span><span class="tx"><span class="lb">アニメーションで確かめる</span><b>リクエストからレスポンスまで</b><span class="d">URL を入力 → GET リクエスト → @app.route のすぐ下の関数が実行される → レスポンスが返り、ブラウザが画面を描く</span></span><span class="go">開く →</span></a>
+  <div class="card">
+    <h3>学習したこと</h3>
+    <ul class="learned">
+      <li>URL を入力して Enter を押すと、<b>リクエスト</b>がサーバーへ送られる。表示される画面は、返ってきた<b>レスポンス</b>(HTML の文字)をブラウザが描いたもの</li>
+      <li>URL は「プロトコル・IP アドレス・ポート番号・パス」でできている</li>
+      <li>Flask は Web アプリを作るためのフレームワーク</li>
+      <li><code>@app.route("/パス")</code> で、パスと<b>すぐ下の関数</b>を結びつける(ルーティング)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>URL の読み方</h3>
+    <div class="fig"><svg id="fig-url" viewBox="0 0 960 220" role="img" aria-label="URLの4つの部分"></svg></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>最小アプリ(app.py)</h3>
+<pre class="code">from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return "Hello, Flask!"
+
+@app.route("/about")
+def about():
+    return "このサイトについて"
+
+if __name__ == "__main__":
+    app.run(debug=True)</pre>
+    </div>
+    <div class="card">
+      <h3>書き方</h3>
+      <div class="tw"><table class="t">
+        <tr><th>書き方</th><th>意味</th></tr>
+        <tr><td><code>from flask import Flask</code></td><td>Flask を使えるようにする</td></tr>
+        <tr><td><code>app = Flask(__name__)</code></td><td>アプリを作る</td></tr>
+        <tr><td><code>@app.route("/パス")</code></td><td>URL のパスと、すぐ下の関数を結びつける</td></tr>
+        <tr><td><code>return "文字"</code></td><td>その文字がレスポンスになる</td></tr>
+        <tr><td><code>app.run(debug=True)</code></td><td>サーバーを起動する(止めるときは Ctrl + C)</td></tr>
+      </table></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>画面での見え方</h3>
+    <div class="views">
+      <div class="vw"><span class="vl">python app.py で起動したときのターミナル</span><div class="term"> * Serving Flask app 'app'
+ * Debug mode: on
+<span class="w">WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.</span>
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit</div></div>
+      <div class="vw"><span class="vl">127.0.0.1:5000/ を開いたとき(return "Hello, Flask!")</span><div class="bw"><div class="tabs"><span class="tab">127.0.0.1:5000/</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/</span></div><div class="page">Hello, Flask!</div></div></div>
+      <div class="vw"><span class="vl">127.0.0.1:5000/about を開いたとき</span><div class="bw"><div class="tabs"><span class="tab">127.0.0.1:5000/about</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/about</span></div><div class="page">このサイトについて</div></div></div>
+    </div>
+    <p class="note">return した文字が、そのまま画面に出る。ターミナルの Running on の後ろが、ブラウザで開く URL。</p>
+  </div>
+</section>
+
+<section class="secblk" id="s02">
+  <header><span class="no">section02</span><h2>テンプレート・リンク</h2></header>
+  <a class="vizcard" href="s01-02.html"><span class="ic" aria-hidden="true">▶</span><span class="tx"><span class="lb">アニメーションで確かめる</span><b>リクエストからレスポンスまで(リンク・404)</b><span class="d">リンクのクリックも GET リクエスト → render_template が templates から HTML を読む → 合う @app.route がないと 404</span></span><span class="go">開く →</span></a>
+  <div class="card">
+    <h3>学習したこと</h3>
+    <ul class="learned">
+      <li>HTML は <b>templates</b> フォルダに置き、<code>render_template("ファイル名")</code> で返す</li>
+      <li>templates フォルダは app.py と同じフォルダの中に置く</li>
+      <li><code>&lt;a href="/about"&gt;</code> のリンクをクリックすると、URL を入力したときと同じく <b>GET /about</b> のリクエストが送られる</li>
+      <li>href のパスと <code>@app.route</code> のパスがそろっていないと 404 Not Found になる</li>
+    </ul>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>app.py</h3>
+<pre class="code">from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)</pre>
+    </div>
+    <div class="card">
+      <h3>フォルダ構成とリンク</h3>
+<pre class="code">section02/
+├ app.py
+└ templates/
+   ├ index.html
+   └ about.html</pre>
+<pre class="code">&lt;!-- index.html の中のリンク --&gt;
+&lt;a href="/about"&gt;このサイトについて&lt;/a&gt;</pre>
+      <p class="note">href="/about" と @app.route("/about") のパスをそろえる。</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>画面での見え方</h3>
+    <div class="views">
+      <div class="vw"><span class="vl">127.0.0.1:5000/(templates/index.html)</span><div class="bw"><div class="tabs"><span class="tab">トップページ</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/</span></div><div class="page"><h1>Hello, Flask!</h1><p>テンプレートから表示しています。</p><a href="#s02">このサイトについて</a></div></div></div>
+      <div class="vw"><span class="vl">リンクをクリック → GET /about(templates/about.html)</span><div class="bw"><div class="tabs"><span class="tab">このサイトについて</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/about</span></div><div class="page"><h1>このサイトについて</h1><p>Flaskの授業で作っているサイトです。</p><a href="#s02">トップへ戻る</a></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="secblk" id="s03">
+  <header><span class="no">section03</span><h2>値の受け渡し・for・if</h2></header>
+  <a class="vizcard" href="s03.html"><span class="ic" aria-hidden="true">▶</span><span class="tx"><span class="lb">アニメーションで確かめる</span><b>値をテンプレートに渡す・for・if</b><span class="d">render_template で値を渡す → {% for i in range(count) %} で i が 0〜3 と変わる → {% if %} で表示が分かれる → できた HTML がレスポンスで届く</span></span><span class="go">開く →</span></a>
+  <div class="card">
+    <h3>学習したこと</h3>
+    <ul class="learned">
+      <li><code>render_template("a.html", 名前=値)</code> で値を渡し、テンプレートの <code>{{ 名前 }}</code> で表示する。<b>= の左がテンプレートで使う名前、右が Python の変数</b></li>
+      <li><code>{% for %}</code> 〜 <code>{% endfor %}</code> で、リストの要素を1つずつ表示する(範囲は字下げではなく endfor まで)</li>
+      <li>複数のリストを<b>同じ番号</b>でそろえ、<code>{% for i in range(count) %}</code> の i で取り出す</li>
+      <li><code>{% if %}</code>・<code>{% elif %}</code>・<code>{% else %}</code> で表示を分ける</li>
+      <li>合計や件数などの集計は、Python 側で for と if を使って計算し、結果だけを渡す</li>
+      <li><code>{{ }}</code> や <code>{% %}</code> は<b>サーバーの中で</b>値に置き換わる。ブラウザに届く HTML には残らない</li>
+    </ul>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>app.py(値を渡す)</h3>
+<pre class="code">names = ["ボールペン", "ノート", "消しゴム", "付箋"]
+prices = [120, 200, 80, 150]
+stocks = [40, 0, 25, 0]
+
+@app.route("/items")
+def items():
+    count = len(names)
+    return render_template("items.html",
+        names=names, prices=prices,
+        stocks=stocks, count=count)</pre>
+    </div>
+    <div class="card">
+      <h3>items.html(for・if)</h3>
+<pre class="code">{% for i in range(count) %}
+&lt;tr&gt;
+  &lt;td&gt;{{ names[i] }}&lt;/td&gt;
+  &lt;td&gt;{{ prices[i] }}円&lt;/td&gt;
+  &lt;td&gt;
+  {% if stocks[i] == 0 %}
+    売り切れ
+  {% else %}
+    {{ stocks[i] }}個
+  {% endif %}
+  &lt;/td&gt;
+&lt;/tr&gt;
+{% endfor %}</pre>
+    </div>
+  </div>
+  <div class="card">
+    <h3>テンプレートの書き方</h3>
+    <div class="tw"><table class="t">
+      <tr><th>書き方</th><th>意味</th></tr>
+      <tr><td><code>{{ 名前 }}</code></td><td>渡された値を表示する(<code>{{ i + 1 }}</code> のように計算もできる)</td></tr>
+      <tr><td><code>{% for x in リスト %}</code> 〜 <code>{% endfor %}</code></td><td>1つずつ取り出してくり返す</td></tr>
+      <tr><td><code>{% for i in range(count) %}</code></td><td>i が 0, 1, 2 … と変わりながらくり返す</td></tr>
+      <tr><td><code>{% if 条件 %}</code> 〜 <code>{% elif %}</code> 〜 <code>{% else %}</code> 〜 <code>{% endif %}</code></td><td>条件で表示を分ける</td></tr>
+      <tr><td><code>len(リスト)</code></td><td>リストの要素の数(Python 側)</td></tr>
+      <tr><td><code>リスト.append(値)</code></td><td>リストの後ろに値を追加する(Python 側)</td></tr>
+    </table></div>
+  </div>
+  <div class="card">
+    <h3>画面での見え方</h3>
+    <div class="views">
+      <div class="vw"><span class="vl">127.0.0.1:5000/(index.html:{{ shop_name }} と for で表示)</span><div class="bw"><div class="tabs"><span class="tab">HALストア大阪支店</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/</span></div><div class="page"><h1>HALストア大阪支店</h1><h2>取り扱い商品</h2><ul><li>ボールペン</li><li>ノート</li><li>消しゴム</li><li>付箋</li></ul><a href="#s03">商品一覧(価格・在庫)</a></div></div></div>
+      <div class="vw"><span class="vl">127.0.0.1:5000/items(items.html:for・if で表を作る)</span><div class="bw"><div class="tabs"><span class="tab">商品一覧</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/items</span></div><div class="page"><h1>商品一覧</h1><table><tr><th>商品名</th><th>価格</th><th>在庫</th></tr><tr><td>ボールペン</td><td>120円</td><td>40個</td></tr><tr><td>ノート</td><td>200円</td><td>売り切れ</td></tr><tr><td>消しゴム</td><td>80円</td><td>25個</td></tr><tr><td>付箋</td><td>150円</td><td>売り切れ</td></tr></table><h2>集計</h2><p>在庫の合計:65個</p><p>売り切れの商品:2商品</p><p>いちばん安い商品:消しゴム(80円)</p><p>在庫がいちばん多い商品:ボールペン(40個)</p><a href="#s03">トップページへ戻る</a></div></div></div>
+    </div>
+    <p class="note">stocks が 0 の商品(ノート・付箋)は、if で「売り切れ」になる。集計の値は Python 側で計算して渡している。</p>
+  </div>
+</section>
+
+<section class="secblk" id="s04">
+  <header><span class="no">section04</span><h2>フォーム</h2></header>
+  <a class="vizcard" href="s04.html"><span class="ic" aria-hidden="true">▶</span><span class="tx"><span class="lb">アニメーションで確かめる</span><b>フォームの値が届くまで</b><span class="d">name=値 → POST /confirm → request.form で受け取る → int() → 計算 → {{ }} に値が入る → 確認画面</span></span><span class="go">開く →</span></a>
+  <div class="card">
+    <h3>学習したこと</h3>
+    <ul class="learned">
+      <li><code>&lt;form action="/confirm" method="post"&gt;</code> で、送信先のパスと送り方を決める</li>
+      <li>入力欄の <code>name</code> が、Python で取り出すときの名前になる(<code>request.form["name の値"]</code>)</li>
+      <li>POST を受け付ける関数には <code>methods=["POST"]</code> を書く(書かないと 405)</li>
+      <li>フォームの値は<b>すべて文字列</b>で届く。計算に使うときは <code>int()</code> で整数にする</li>
+      <li>ドロップダウンリスト・ラジオボタンは、選んだ <code>value</code> が1つ届く</li>
+      <li>チェックボックスは選んだものだけが届き、<code>request.form.getlist("名前")</code> でリストとして受け取る</li>
+      <li>GET は値が URL に付く。POST は値がリクエストの本文で送られる(暗号化は HTTPS の役割)</li>
+    </ul>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>送る側(order.html)</h3>
+<pre class="code">&lt;form action="/confirm" method="post"&gt;
+  &lt;input type="text" name="customer" required&gt;
+  &lt;select name="item"&gt;
+    &lt;option value="0"&gt;ボールペン&lt;/option&gt; …
+  &lt;/select&gt;
+  &lt;input type="number" name="qty" min="1" required&gt;
+  &lt;input type="radio" name="delivery" value="0" checked&gt;
+  &lt;input type="checkbox" name="option" value="0"&gt;
+  &lt;button type="submit"&gt;確認画面へ&lt;/button&gt;
+&lt;/form&gt;</pre>
+    </div>
+    <div class="card">
+      <h3>受け取る側(app.py)</h3>
+<pre class="code">@app.route("/confirm", methods=["POST"])
+def confirm():
+    customer = request.form["customer"]
+    item = int(request.form["item"])
+    qty = int(request.form["qty"])
+    subtotal = prices[item] * qty
+    d = int(request.form["delivery"])
+    selected = request.form.getlist("option")
+    …
+    return render_template("confirm.html", …)</pre>
+      <p class="note"><code>from flask import Flask, render_template, request</code> の request を忘れない。</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>フォームの部品と受け取り方</h3>
+    <div class="tw"><table class="t">
+      <tr><th>部品</th><th>画面での見え方</th><th>HTML</th><th>送られる値</th><th>何も入力・選択しないと</th><th>Python での受け取り方</th></tr>
+      <tr><td>テキスト</td><td class="live"><input type="text" value="パイソン太郎" aria-label="テキストの例"></td><td><code>&lt;input type="text"&gt;</code></td><td>入力した文字列</td><td><code>""</code></td><td><code>request.form["名前"]</code></td></tr>
+      <tr><td>数値</td><td class="live"><input type="number" value="3" min="1" aria-label="数値の例"> <span class="note" style="font-size:12px">右の▲▼で増減</span></td><td><code>&lt;input type="number"&gt;</code></td><td>数字の文字列 <code>"3"</code></td><td><code>""</code>(<code>required</code> で防ぐ)</td><td><code>int(request.form["名前"])</code></td></tr>
+      <tr><td>ドロップダウンリスト</td><td class="live"><select aria-label="ドロップダウンリストの例"><option>ボールペン(120円)</option><option selected>消しゴム(80円)</option></select></td><td><code>&lt;select&gt;</code>・<code>&lt;option&gt;</code></td><td>選んだ <code>value</code> 1つ</td><td>(必ずどれかが選ばれる)</td><td><code>request.form["名前"]</code></td></tr>
+      <tr><td>ラジオボタン</td><td class="live"><label><input type="radio" name="demo-r"> 店頭で受け取る</label><br><label><input type="radio" name="demo-r" checked> 配送する</label></td><td><code>&lt;input type="radio"&gt;</code></td><td>選んだ <code>value</code> 1つ</td><td><b>送られない</b>(<code>checked</code> で防ぐ)</td><td><code>request.form["名前"]</code></td></tr>
+      <tr><td>チェックボックス</td><td class="live"><label><input type="checkbox" checked> ギフト包装</label><br><label><input type="checkbox"> カード</label><br><label><input type="checkbox" checked> 領収書</label></td><td><code>&lt;input type="checkbox"&gt;</code></td><td>選んだ <code>value</code> すべて</td><td><b>送られない</b></td><td><code>request.form.getlist("名前")</code> → リスト</td></tr>
+    </table></div>
+  </div>
+  <div class="card">
+    <h3>画面での見え方</h3>
+    <div class="views">
+      <div class="vw"><span class="vl">127.0.0.1:5000/order(order.html)</span><div class="bw"><div class="tabs"><span class="tab">注文フォーム</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/order</span></div><div class="page"><h1>注文フォーム</h1><form id="demo-order" novalidate><p>お名前:<input type="text" name="customer" value="パイソン太郎" required></p><p>商品:<select name="item"><option value="0">ボールペン(120円)</option><option value="2" selected>消しゴム(80円)</option></select></p><p>数量:<input type="number" name="qty" min="1" value="3" required style="width:5em"></p><p>受け取り方法:<label><input type="radio" name="delivery" value="0"> 店頭で受け取る(+0円)</label> <label><input type="radio" name="delivery" value="1" checked> 配送する(+500円)</label></p><p>オプション:<label><input type="checkbox" name="option" value="0" checked> ギフト包装(+100円)</label> <label><input type="checkbox" name="option" value="1"> メッセージカード(+50円)</label> <label><input type="checkbox" name="option" value="2" checked> 領収書(+0円)</label></p><button type="submit">確認画面へ</button></form><a href="#s04">トップページへ戻る</a></div></div></div>
+      <div class="vw"><span class="vl">「確認画面へ」→ POST /confirm(confirm.html)</span><div class="bw"><div class="tabs"><span class="tab">注文内容の確認</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/confirm</span></div><div class="page" id="demo-confirm"><h1>注文内容の確認</h1><p>パイソン太郎 様</p><table><tr><th>商品</th><td>消しゴム</td></tr><tr><th>単価</th><td>80円</td></tr><tr><th>数量</th><td>3個</td></tr><tr><th>小計</th><td>240円</td></tr><tr><th>受け取り方法</th><td>配送する(送料 500円)</td></tr><tr><th>オプション</th><td><ul><li>ギフト包装</li><li>領収書</li></ul></td></tr><tr><th>合計</th><td>840円</td></tr></table><a href="#s04">注文フォームへ戻る</a></div></div></div>
+    </div>
+    <p class="sent" id="demo-sent"></p>
+    <p class="note">左の注文フォームの入力を変えて「確認画面へ」を押すと、右の確認画面が変わる(実際の app.py と同じ計算)。商品の選択肢は、在庫がある商品(ボールペン・消しゴム)だけ。チェックしなかったオプションは送られないので、確認画面にも出ない。</p>
+  </div>
+</section>
+
+<section class="secblk" id="errors">
+  <header><span class="no">共通</span><h2>エラー早見表</h2></header>
+  <div class="card"><div class="tw"><table class="t err">
+    <tr><th>表示・症状</th><th>よくある原因</th><th>出てくる単元</th></tr>
+    <tr><td>No module named 'flask'</td><td>py12env が有効になっていない/VS Code のインタープリターが py12env ではない</td><td>S01</td></tr>
+    <tr><td>ポートが使用中</td><td>前に起動したサーバーが動いたまま。Ctrl + C で止めてから起動し直す</td><td>S01</td></tr>
+    <tr><td>404 Not Found</td><td>URL・href のパスと <code>@app.route</code> のパスが違う</td><td>S01・S02</td></tr>
+    <tr><td>TemplateNotFound</td><td>フォルダ名が templates ではない/HTMLのファイル名のつづり</td><td>S02</td></tr>
+    <tr><td>TemplateSyntaxError</td><td><code>{% endfor %}</code>・<code>{% endif %}</code> の書き忘れ、<code>{% %}</code> と <code>{{ }}</code> の書き間違い</td><td>S03</td></tr>
+    <tr><td>(何も表示されない)</td><td><code>render_template</code> で値を渡し忘れている/名前のつづりが違う</td><td>S03</td></tr>
+    <tr><td>405 Method Not Allowed</td><td><code>methods=["POST"]</code> の書き忘れ/URL を直接入力して POST 専用のページを開いた</td><td>S04</td></tr>
+    <tr><td>400 Bad Request</td><td><code>request.form["…"]</code> の名前と <code>name</code> が違う/ラジオボタンが未選択(<code>checked</code> を付ける)</td><td>S04</td></tr>
+    <tr><td>ValueError(int)</td><td>空の文字列 <code>""</code> を <code>int()</code> した(<code>required</code> を付ける)</td><td>S04</td></tr>
+    <tr><td>合計が「333…」</td><td><code>int()</code> を忘れて、文字列のまま計算している</td><td>S04</td></tr>
+  </table></div></div>
+  <div class="card">
+    <h3>よく見るエラー画面</h3>
+    <div class="views">
+      <div class="vw"><span class="vl">404 Not Found(パスに合う @app.route がない)</span><div class="bw"><div class="tabs"><span class="tab">404 Not Found</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/contact</span></div><div class="page"><h1>Not Found</h1><p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p></div></div></div>
+      <div class="vw"><span class="vl">405 Method Not Allowed(methods=["POST"] の書き忘れなど)</span><div class="bw"><div class="tabs"><span class="tab">405 Method Not Allowed</span><span class="wc"><i>─</i><i>☐</i><i class="x">✕</i></span></div><div class="bar"><span class="nv">←</span><span class="nv">→</span><span class="nv">⟳</span><span class="url">127.0.0.1:5000/confirm</span></div><div class="page"><h1>Method Not Allowed</h1><p>The method is not allowed for the requested URL.</p></div></div></div>
+    </div>
+  </div>
+</section>
+</main>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="markers"></defs></svg>
+<script src="js/index.js"></script>
+</body>
+</html>

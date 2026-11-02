@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja" data-viz-mode="video">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>リクエストからレスポンスまで</title>
+<link rel="stylesheet" href="css/viz.css">
+<link rel="stylesheet" href="css/s01-02.css">
+</head>
+<body>
+<main>
+<p class="back"><a href="index.html#s01">← 一覧へ戻る</a></p>
+<h1>リクエストからレスポンスまで</h1>
+<div class="stagewrap">
+  <canvas id="c" data-role="stage" width="1280" height="830"></canvas>
+</div>
+<div class="caption" id="cap" data-role="narration"></div>
+<div class="controls">
+  <button class="primary" id="play" data-role="play">❚❚ 一時停止</button>
+  <button id="reset" data-role="reset">最初から</button>
+  <button id="next" data-role="step">次の出来事へ ▶</button>
+  <input type="range" id="seek" data-role="seek" min="0" max="1000" value="0" aria-label="再生位置">
+  <span class="time" id="time"></span>
+  <label>速さ <select id="speed" data-role="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+  <label class="opt"><input type="checkbox" data-role="hitstop" checked> 大事な場面で止める</label>
+  <label class="opt">止める長さ <select data-role="hold-length"><option value="0.6">短め</option><option value="1" selected>標準</option><option value="1.5">長め</option></select></label>
+  <label class="opt"><input type="checkbox" data-role="loop"> くり返す</label>
+</div>
+<p class="note">※ 実際は 0.1 秒もかからない出来事を、ゆっくり再生しています。</p>
+<section class="try" aria-labelledby="tryh">
+<h2 id="tryh">試す:URL のパスを変えると、どの関数が実行される?</h2>
+<div class="row"><label>URL 欄に入れる <span class="mono">127.0.0.1:5000</span><select id="t-path"><option>/</option><option selected>/about</option><option>/contact</option></select></label></div>
+<div>予想:どうなる?</div>
+<div class="row"><button type="button" class="t-ans" data-a="index">index() が実行される</button><button type="button" class="t-ans" data-a="about">about() が実行される</button><button type="button" class="t-ans" data-a="404">合う関数がない(404)</button><button type="button" class="t-ans" data-a="self">自分で関数を呼ぶ必要がある</button></div>
+<div class="res" id="t-res" aria-live="polite"></div>
+<div class="out" id="t-out"></div>
+<div class="row"><button type="button" id="t-see" disabled>上の図でこの場面を見る</button></div>
+</section>
+</main>
+<script src="js/lib/objects2d.js"></script>
+<script src="js/lib/player.js"></script>
+<script src="js/s01-02.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja" data-viz-mode="video">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>フォームの値が届くまで</title>
+<link rel="stylesheet" href="css/viz.css">
+<link rel="stylesheet" href="css/s04.css">
+</head>
+<body>
+<main>
+<p class="back"><a href="index.html#s04">← 一覧へ戻る</a></p>
+<h1>フォームの値が届くまで</h1>
+<div class="stagewrap">
+  <canvas id="c" data-role="stage" width="1280" height="846"></canvas>
+</div>
+<div class="caption" id="cap" data-role="narration"></div>
+<div class="stagewrap flowwrap"><canvas id="flow" width="1280" height="74" aria-label="いまどの段階か"></canvas></div>
+<div class="controls">
+  <button class="primary" id="play" data-role="play">❚❚ 一時停止</button>
+  <button id="reset" data-role="reset">最初から</button>
+  <button id="next" data-role="step">次の出来事へ ▶</button>
+  <input type="range" id="seek" data-role="seek" min="0" max="1000" value="0" aria-label="再生位置">
+  <span class="time" id="time"></span>
+  <label>速さ <select id="speed" data-role="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+  <label class="opt"><input type="checkbox" data-role="hitstop" checked> 大事な場面で止める</label>
+  <label class="opt">止める長さ <select data-role="hold-length"><option value="0.6">短め</option><option value="1" selected>標準</option><option value="1.5">長め</option></select></label>
+  <label class="opt"><input type="checkbox" data-role="loop"> くり返す</label>
+</div>
+<p class="note">※ 実際は 0.1 秒もかからない出来事を、ゆっくり再生しています。下の帯は、いまどの段階かを表します。値は例(お名前「パイソン太郎」、消しゴム、数量 3、配送する、ギフト包装と領収書)。</p>
+<section class="try" aria-labelledby="tryh">
+<h2 id="tryh">試す:入力を変えて、届く値と合計を確かめる</h2>
+<div class="row">
+  <label>数量 <input type="number" id="t-qty" min="1" max="20" value="3" required></label>
+  <span>受け取り方法 <label><input type="radio" name="t-del" value="0"> 店頭で受け取る</label> <label><input type="radio" name="t-del" value="1" checked> 配送する</label></span>
+</div>
+<div class="row">オプション
+  <label><input type="checkbox" class="t-opt" value="0" checked> ギフト包装(+100円)</label>
+  <label><input type="checkbox" class="t-opt" value="1"> メッセージカード(+50円)</label>
+  <label><input type="checkbox" class="t-opt" value="2" checked> 領収書(+0円)</label>
+</div>
+<div class="out" id="t-out"></div>
+<div class="q">
+  <div>予想:Python で <code>request.form["option"]</code> と書くと、何が取り出せる?(上で2つ以上チェックした状態で考える)</div>
+  <div class="row"><button type="button" class="t-ans" data-a="all">チェックした値がすべて</button><button type="button" class="t-ans" data-a="first">最初の1つだけ</button><button type="button" class="t-ans" data-a="err">必ずエラー</button></div>
+  <div class="res" id="t-res" aria-live="polite"></div>
+</div>
+<div class="q">
+  <div>予想:数量に 3 と入れて送ったとき、Python で <code>request.form["qty"] + 1</code> と書くと?</div>
+  <div class="row"><button type="button" class="t-ans2" data-a="4">4</button><button type="button" class="t-ans2" data-a="31">'31'</button><button type="button" class="t-ans2" data-a="err">エラー</button></div>
+  <div class="res" id="t-res2" aria-live="polite"></div>
+</div>
+</section>
+</main>
+<script src="js/lib/objects2d.js"></script>
+<script src="js/lib/player.js"></script>
+<script src="js/s04.js"></script>
+</body>
+</html>

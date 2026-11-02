@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja" data-viz-mode="video">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>値をテンプレートに渡す・for・if</title>
+<link rel="stylesheet" href="css/viz.css">
+<link rel="stylesheet" href="css/s03.css">
+</head>
+<body>
+<main>
+<p class="back"><a href="index.html#s03">← 一覧へ戻る</a></p>
+<h1>値をテンプレートに渡す・for・if</h1>
+<p class="scrollhint">← 図は横にスクロールできます →</p>
+<div class="stagewrap"><canvas id="c" data-role="stage" width="1280" height="712"></canvas></div>
+<div class="caption" id="cap" data-role="narration"></div>
+<div class="stagewrap flowwrap"><canvas id="flow" width="1280" height="74" aria-label="いまどの段階か"></canvas></div>
+<div id="pred" aria-live="polite"><span id="predq">予想:在庫の欄に表示されるのは?</span><button type="button" data-p="1">売り切れ</button><button type="button" data-p="0">○個(在庫の数)</button><b id="predr"></b></div>
+<div class="controls">
+  <button class="primary" id="play" data-role="play">❚❚ 一時停止</button>
+  <button id="reset" data-role="reset">最初から</button>
+  <button id="next" data-role="step">次の出来事へ ▶</button>
+  <input type="range" id="seek" data-role="seek" min="0" max="1000" value="0" aria-label="再生位置">
+  <span class="time" id="time"></span>
+  <label>速さ <select id="speed" data-role="speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select></label>
+  <label class="opt"><input type="checkbox" id="evstop"> 字幕ごとに止める(「次の出来事へ」で進む)</label>
+  <label class="opt"><input type="checkbox" data-role="loop"> くり返す</label>
+</div>
+<div class="controls">
+  <label>stocks の値 <select id="preset"><option value="40,0,25,0" selected>[40, 0, 25, 0](授業の値)</option><option value="0,0,0,0">[0, 0, 0, 0](全部 0)</option><option value="5,30,0,12">[5, 30, 0, 12]</option></select></label>
+  <label class="opt"><input type="checkbox" id="predict"> if の結果を予想してから進む</label>
+  <label class="opt"><input type="checkbox" id="flat"> テンプレートの字下げをなくす</label>
+</div>
+<p class="note">※ 実際は 0.1 秒もかからない出来事を、ゆっくり再生しています。下の帯は、いまどの段階かを表します。</p>
+</main>
+<script src="js/lib/objects2d.js"></script>
+<script src="js/lib/player.js"></script>
+<script src="js/s03.js"></script>
+</body>
+</html>
