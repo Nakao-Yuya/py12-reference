@@ -27,35 +27,32 @@
     <h3>URL の読み方</h3>
     <div class="fig"><svg id="fig-url" viewBox="0 0 960 220" role="img" aria-label="URLの4つの部分"></svg></div>
   </div>
-  <div class="grid2">
-    <div class="card">
-      <h3>最小アプリ(app.py)</h3>
-<pre class="code">from flask import Flask
+  <div class="card">
+    <h3>最小アプリ(app.py)</h3>
+<pre class="code"><span class="cm"># Flask を使えるようにする(flask ライブラリから Flask を読み込む)</span>
+from flask import Flask
 
+<span class="cm"># アプリを作る。この app が Web アプリ本体</span>
 app = Flask(__name__)
 
+<span class="cm"># @app.route("/パス"):URL のパスと、すぐ下の関数を結びつける(ルーティング)</span>
+<span class="cm"># 127.0.0.1:5000/ が開かれたら、すぐ下の index() が実行される</span>
 @app.route("/")
 def index():
+    <span class="cm"># return した文字が、そのままレスポンスになる(画面に表示される)</span>
     return "Hello, Flask!"
 
+<span class="cm"># 127.0.0.1:5000/about が開かれたら、すぐ下の about() が実行される</span>
 @app.route("/about")
 def about():
     return "このサイトについて"
 
+<span class="cm"># python app.py で実行したときに、サーバーを起動する</span>
+<span class="cm"># debug=True:保存すると自動で再起動し、エラーの詳しい内容も表示される</span>
+<span class="cm"># サーバーを止めるときは、ターミナルで Ctrl + C</span>
 if __name__ == "__main__":
     app.run(debug=True)</pre>
-    </div>
-    <div class="card">
-      <h3>書き方</h3>
-      <div class="tw"><table class="t">
-        <tr><th>書き方</th><th>意味</th></tr>
-        <tr><td><code>from flask import Flask</code></td><td>Flask を使えるようにする</td></tr>
-        <tr><td><code>app = Flask(__name__)</code></td><td>アプリを作る</td></tr>
-        <tr><td><code>@app.route("/パス")</code></td><td>URL のパスと、すぐ下の関数を結びつける</td></tr>
-        <tr><td><code>return "文字"</code></td><td>その文字がレスポンスになる</td></tr>
-        <tr><td><code>app.run(debug=True)</code></td><td>サーバーを起動する(止めるときは Ctrl + C)</td></tr>
-      </table></div>
-    </div>
+    <p class="note"># から行の終わりまではコメント(説明のメモ)。実行には影響しない。</p>
   </div>
   <div class="card">
     <h3>画面での見え方</h3>
@@ -282,5 +279,6 @@ def confirm():
 </main>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="markers"></defs></svg>
 <script src="js/index.js"></script>
+<script src="js/feedback.js"></script>
 </body>
 </html>
