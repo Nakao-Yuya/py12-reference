@@ -1,0 +1,24 @@
+/* アニメーションの3ページで共通の見た目 */
+:root{--bg:#F4F6F9;--panel:#fff;--ink:#1E2430;--muted:#4A5568;--line:#B8C2CF;--accent:#1F3A5F}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121417;--panel:#1b1e23;--ink:#e7e5e0;--muted:#a1a8b1;--line:#30343a;--accent:#9DBBE3}}
+:root[data-theme="dark"]{--bg:#121417;--panel:#1b1e23;--ink:#e7e5e0;--muted:#a1a8b1;--line:#30343a;--accent:#9DBBE3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Yu Gothic UI","Yu Gothic","Meiryo","Hiragino Sans",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:.2em 0 10px;color:var(--accent)}
+.stagewrap{border-radius:10px;overflow-x:auto;border:1px solid var(--line);background:#F9FBFD}
+canvas{display:block;width:100%;height:auto}
+@media (max-width:700px){canvas{min-width:880px}}
+.endnote{display:inline-block;background:#FFD08A;color:#1b1600;font-weight:700;border-radius:6px;padding:1px 8px;margin-right:8px;font-size:.9em}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
+button,select{font:inherit;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] button.primary{color:#12171E}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.primary{color:#12171E}}
+#seek{flex:1 1 220px;accent-color:#C9772A}
+.time{font-variant-numeric:tabular-nums;color:var(--muted);min-width:6.5em}
+.opt{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.opt input{width:18px;height:18px}
+.note{color:var(--muted);font-size:.9rem}
+.back{margin:0 0 4px;font-size:.9rem}
+.back a{color:inherit}

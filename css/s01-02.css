@@ -1,0 +1,18 @@
+/* s01-02.html だけで使う見た目 */
+.caption{background:#1E2A3F;color:#fff;border-radius:8px;padding:9px 14px;line-height:1.6;margin-top:8px;min-height:2.6em}
+button.primary{color:#fff}
+.try{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
+.try h2{font-size:1.1rem;margin:0 0 8px;color:var(--accent)}
+.try .row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:6px 0}
+.try code,.try .mono{font-family:Consolas,Menlo,monospace}
+.try .out{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin-top:8px;font-family:Consolas,Menlo,monospace;font-size:15px}
+.try .out .k{color:var(--muted)}
+.try .out span{min-width:0;overflow-wrap:anywhere}
+@media (max-width:600px){.try .out{grid-template-columns:1fr}}
+.try .q{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.try .res{margin-top:6px;font-weight:700}
+.try .good{color:#1E6B45} .try .bad{color:#B3261E}
+input[type=number]{font:inherit;width:5em;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.caption b{color:#FFD08A}
+.caption code{font-family:Consolas,Menlo,monospace;color:#FFD08A}
+@media (max-width:600px){.caption{font-size:.85rem;left:6px;right:6px;bottom:6px;padding:5px 8px}}
