@@ -75,6 +75,7 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--sub);font-
 .vizcard .go{margin-left:auto;font-weight:700;color:var(--svs);white-space:nowrap}
 @media (max-width:600px){.vizcard .go{display:none}}
 pre.code{border:1px solid var(--line);border-radius:6px;background:#FBFCFD}
+pre.code .cm{color:#2E7D4F}
 .views{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;align-items:start}
 .vw{display:flex;flex-direction:column;gap:6px}
 .vw .vl{font-size:13px;font-weight:700;color:var(--sub)}
@@ -113,3 +114,11 @@ nav.toc a[aria-selected="true"]{background:#fff;color:var(--navy);border-bottom-
 .pager a{font-weight:700;color:var(--navy);text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 14px}
 .pager a:hover,.pager a:focus-visible{border-color:var(--svs);outline:none}
 .pager .sp{flex:1}
+/* 質問・要望ボックス(js/feedback.js が各 section の下に入れる) */
+.feedback{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:#F3F7FC;border:1px dashed var(--brs);border-radius:10px;padding:12px 16px;margin-top:20px}
+.feedback .fb-tx{display:flex;flex-direction:column;gap:2px;flex:1 1 320px;min-width:0}
+.feedback .fb-tx b{color:var(--navy);font-size:16px}
+.feedback .fb-tx span{font-size:13.5px;color:var(--sub)}
+.feedback .fb-btn{display:inline-block;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;border-radius:8px;padding:9px 16px;white-space:nowrap}
+.feedback .fb-btn:hover,.feedback .fb-btn:focus-visible{background:#2B4E7E;outline:none}
+.feedback .fb-btn.off{background:#B8C2CF;cursor:default}
