@@ -10,7 +10,7 @@
         (URL の中の PART が、section の名前に置き換わる)
    FORM_URL が空のあいだは「準備中」と表示する。
    ===================================================================== */
-const FORM_URL = "";
+const FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=19ZBjc42DE6Mbc8sVMOQOYWSg1eEoxxAgoRJYyW3pAFUNlYzWDNWV1hEOFY0U1dRQTRWRzBWUkhJSy4u&rb9275521d85145b981a80797c96825ab=PART";
 
 (function(){
   const names={};
@@ -18,9 +18,9 @@ const FORM_URL = "";
   document.querySelectorAll("section.secblk").forEach(sec=>{
     const part=names[sec.id]||sec.id;
     const box=document.createElement("div"); box.className="feedback";
-    const head='<div class="fb-tx"><b>質問・要望</b><span>この section の「分かりにくい」「追加してほしい」「間違いを見つけた」などを送ってください。名前は書かなくても送れます。</span></div>';
+    const head='<div class="fb-tx"><b>質問・要望</b><span>この section の「分かりにくい」「追加してほしい」「間違いを見つけた」などを送ってください。学校のアカウントでサインインして送ります(名前は記録されません)。</span></div>';
     if(FORM_URL){
-      const url=FORM_URL.replace("PART",encodeURIComponent(part));
+      const url=FORM_URL.replace(/PART$/,encodeURIComponent(part));
       box.innerHTML=head+`<a class="fb-btn" href="${url}" target="_blank" rel="noopener">質問・要望を送る(${part})</a>`;
     } else {
       box.innerHTML=head+'<span class="fb-btn off">準備中</span>';
