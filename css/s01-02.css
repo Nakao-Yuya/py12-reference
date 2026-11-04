@@ -16,3 +16,12 @@ input[type=number]{font:inherit;width:5em;padding:5px 8px;border-radius:6px;bord
 .caption b{color:#FFD08A}
 .caption code{font-family:Consolas,Menlo,monospace;color:#FFD08A}
 @media (max-width:600px){.caption{font-size:.85rem;left:6px;right:6px;bottom:6px;padding:5px 8px}}
+/* スマホ(縦長の配置) */
+@media (max-width:700px){
+  canvas.portrait{min-width:0}
+  h1{font-size:1.1rem}
+  .controls{gap:8px}
+  .controls button{flex:1 1 30%;padding:10px 6px}
+  #seek{flex:1 1 100%}
+}
+@media (max-width:700px){.caption{position:sticky;bottom:0;z-index:3}}

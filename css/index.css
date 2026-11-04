@@ -122,3 +122,14 @@ nav.toc a[aria-selected="true"]{background:#fff;color:var(--navy);border-bottom-
 .feedback .fb-btn{display:inline-block;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;border-radius:8px;padding:9px 16px;white-space:nowrap}
 .feedback .fb-btn:hover,.feedback .fb-btn:focus-visible{background:#2B4E7E;outline:none}
 .feedback .fb-btn.off{background:#B8C2CF;cursor:default}
+/* スマホ:表は1行ずつカードのように縦に並べる */
+@media (max-width:600px){
+  table.t,table.t tbody,table.t tr,table.t td{display:block;width:100%}
+  table.t tr:first-child{display:none}
+  table.t tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;overflow:hidden;background:var(--panel)}
+  table.t td{border:none;border-top:1px solid var(--line);padding:6px 10px}
+  table.t td:first-child{border-top:none;background:var(--br);font-weight:700}
+  table.t td[data-label]::before{content:attr(data-label);display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:2px}
+  table.t td:first-child::before{display:none}
+  pre.code{font-size:13px}
+}

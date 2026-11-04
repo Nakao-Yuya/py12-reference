@@ -7,3 +7,13 @@
 #pred{display:none;gap:8px;flex-wrap:wrap;align-items:center;min-height:48px;margin:6px 0 0;visibility:hidden;background:var(--panel);border:2px solid #C9772A;border-radius:8px;padding:6px 12px}
 #pred.on{visibility:visible}
 body.predmode #pred{display:flex}
+/* スマホ(縦長の配置) */
+@media (max-width:700px){
+  canvas.portrait{min-width:0}
+  .scrollhint{display:none}
+  h1{font-size:1.1rem}
+  .caption{position:sticky;bottom:0;z-index:3}
+  .controls{gap:8px}
+  .controls button{flex:1 1 30%;padding:10px 6px}
+  #seek{flex:1 1 100%}
+}
