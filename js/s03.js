@@ -1,4 +1,6 @@
-const cv=document.getElementById("c"), W=cv.width, H=cv.height; let g=cv.getContext("2d"); const FG=document.getElementById("flow").getContext("2d");
+const cv=document.getElementById("c"), FC=document.getElementById("flow"); let W=cv.width, H=cv.height; let g=cv.getContext("2d"); const FG=FC.getContext("2d");
+// 画面の幅が狭いとき(スマホ)は縦長の配置にする:サーバー=上・ブラウザ=下
+const MQ=matchMedia("(max-width:700px)"); let P=false;
 const UI='"Yu Gothic UI","Yu Gothic","Meiryo","Hiragino Sans","Noto Sans JP",sans-serif', MONO='Consolas,Menlo,"Courier New",monospace';
 const NOLABEL=new URLSearchParams(location.search).has("nolabel");
 const C={req:"#C9772A",res:"#1F3A5F",br:"#DCE6F2",brs:"#2F6FB2",sv:"#FFF1E0",svs:"#C9772A",svt:"#6B3A0A",ink:"#1E2430",sub:"#4A5568",line:"#B8C2CF",ok:"#1E6B45",bad:"#B3261E",hl:"rgba(255,208,138,.75)",f:["#2F6FB2","#C9772A","#1E6B45"]};
@@ -33,18 +35,25 @@ function lay(t){ const f=focus(t);
   const bx=24, sx=lerp(1256-SW0*0.193,240,f);
   return {f, bx, by:TOP, bs, sx, sy:TOP, ss}; }
 // ---------- app.py ----------
-const PYX=32, PYL=[null,null,null,"",'@app.route("/items")',"def items():","    count = len(names)",'    return render_template("items.html",',"        names=names, prices=prices,","        stocks=stocks, count=count)"];
-const PYY=[74,102,130,0,170,196,222,248,274,300];
+let PYX=32; const PYL=[null,null,null,"",'@app.route("/items")',"def items():","    count = len(names)",'    return render_template("items.html",',"        names=names, prices=prices,","        stocks=stocks, count=count)"];
+let PYY=[74,102,130,0,170,196,222,248,274,300];
 const LISTN=["names","prices","stocks"];
 function listParts(r){ const arr=r===0?NAMES.map(v=>'"'+v+'"'):(r===1?PRICES:STOCKS).map(String); return arr; }
 const LF=13.5;
 function elPos(r,i){ const arr=listParts(r); let x=PYX+tw(LISTN[r]+" = [",{mono:1,size:LF}); for(let k=0;k<i;k++) x+=tw(arr[k]+", ",{mono:1,size:LF}); const w=tw(arr[i],{mono:1,size:LF}); return {x:x+w/2, y:PYY[r], w, x0:x}; }
 // ---------- テンプレート ----------
-const TX=470, TP=['<table border="1">','<tr><th>商品名</th><th>価格</th><th>在庫</th></tr>','{% for i in range(count) %}','<tr>','  <td>{{ names[i] }}</td>','  <td>{{ prices[i] }}円</td>','  <td>','  {% if stocks[i] == 0 %}','    売り切れ','  {% else %}','    {{ stocks[i] }}個','  {% endif %}','  </td>','</tr>','{% endfor %}','</table>'];
-const TPY=i=>72+i*23.5, tpl=i=>FLAT?TP[i].trim():TP[i];
-const BADGEX=850;
+let TX=470; const TP=['<table border="1">','<tr><th>商品名</th><th>価格</th><th>在庫</th></tr>','{% for i in range(count) %}','<tr>','  <td>{{ names[i] }}</td>','  <td>{{ prices[i] }}円</td>','  <td>','  {% if stocks[i] == 0 %}','    売り切れ','  {% else %}','    {{ stocks[i] }}個','  {% endif %}','  </td>','</tr>','{% endfor %}','</table>'];
+let TPY=i=>72+i*23.5; const tpl=i=>FLAT?TP[i].trim():TP[i];
+let BADGEX=850;
+
+function applyMode(){ P=MQ.matches;
+  cv.width=P?480:1280; cv.height=P?960:712; W=cv.width; H=cv.height; FC.width=P?480:1280; FC.height=P?112:74;
+  cv.classList.toggle("portrait",P); FC.classList.toggle("portrait",P);
+  if(P){ PYX=20; PYY=[56,80,104,0,134,156,178,200,222,244]; TX=24; TPY=i=>402+i*21.5; BADGEX=TX+260; HX=20; HY0=800; HL=i=>HY0+i*14.5; }
+  else { PYX=32; PYY=[74,102,130,0,170,196,222,248,274,300]; TX=470; TPY=i=>72+i*23.5; BADGEX=850; HX=32; HY0=472; HL=i=>HY0+i*17.5; } }
 // ---------- できあがる HTML(書き込みの予定) ----------
-const HX=32, HY0=472, HL=i=>HY0+i*17.5;
+let HX=32, HY0=472, HL=i=>HY0+i*17.5;
+applyMode(); MQ.addEventListener("change",applyMode);
 function writes(){ const S=STOCKS, w=[]; // {t:着く時刻, line, s:書く文字, from:テンプレートの行}
   w.push({t:A.tstart+0.6,line:0,s:'<table border="1">',from:0},{t:A.tstart+1.1,line:1,s:'<tr><th>商品名</th><th>価格</th><th>在庫</th></tr>',from:1});
   for(let i=0;i<4;i++){ const z=S[i]===0;
@@ -144,7 +153,7 @@ function drawFlow(t){ const gm=g; g=FG; const y=37, x0=20, w=(W-40)/FLOW.length;
   g=gm; }
 // ---------- まとめて描く ----------
 let WS=writes(), RT=0; const PULSE=()=>0.55+0.45*(0.5+0.5*Math.sin(RT*4.5));
-function render(t){
+function renderL(t){
   g.fillStyle="#F9FBFD"; g.fillRect(0,0,W,H);
   const L=lay(t);
   OBJ2D.laptop(g,72,48,0.62,{t,active:t<A.go||t>=A.show}); label("ブラウザ(クライアント)",226,48,C.brs);
@@ -173,6 +182,107 @@ function render(t){
     g.globalAlpha=a; OBJ2D.packet(g,x,y,1.1,{t,text:"200 OK + HTML",color:C.res,dir:-1}); g.globalAlpha=1; }
   drawFlow(t);
 }
+
+// ---------- 縦長(スマホ)の配置 ----------
+const SWP=464, SHP=954;
+function camP(t){ return 40*ease(win(t,A.tstart-0.6,A.tstart))+80*ease(win(t,A.done,A.done+0.6)); }
+function layP(t){ const f=focus(t), ss=lerp(0.3,1,f), cam=camP(t)*f;
+  const bs=lerp(0.83,0.1,f), bw=BW0*bs, bh=BH0*bs;
+  return {f, ss, sx:lerp((W-SWP*0.3)/2,8,f), sy:lerp(22,30-cam,f), bs, bx:(W-bw)/2, by:H-8-bh}; }
+function drawServerP(t,ws){
+  const S=STOCKS, st=tplState(t);
+  rr(0,0,SWP,SHP,12,C.sv,C.svs,3);
+  // app.py
+  rr(8,8,448,252,10,"#fff",C.svs,2.5); txt("app.py",PYX,30,{b:1,size:16,c:C.svt}); txt("Python のプログラム",PYX+66,30,{size:12,c:C.sub});
+  const hlPy=[]; if(t>=A.route&&t<A.call) hlPy.push(4); if(t>=A.call&&t<A.data) hlPy.push(5); if(t>=A.data&&t<A.count) hlPy.push(0,1,2);
+  if(t>=A.count&&t<A.pass) hlPy.push(6); if(t>=A.pass&&t<A.tstart) hlPy.push(7,8,9);
+  hlPy.forEach(i=>{ g.save(); g.setLineDash([8,6]); g.lineDashOffset=-RT*30; g.strokeStyle=C.svs; g.lineWidth=2; g.strokeRect(12,PYY[i]-12,440,24); g.restore(); g.globalAlpha=PULSE(); g.fillStyle=C.hl; g.fillRect(14,PYY[i]-11,436,22); g.globalAlpha=1; });
+  [0,1,2].forEach(r=>{ let x=PYX; x+=txt(LISTN[r]+" = [",x,PYY[r],{mono:1,size:LF}); listParts(r).forEach((v,i)=>{ x+=txt(v,x,PYY[r],{mono:1,size:LF}); if(i<3) x+=txt(", ",x,PYY[r],{mono:1,size:LF}); }); txt("]",x,PYY[r],{mono:1,size:LF}); });
+  PYL.forEach((l,i)=>{ if(i>3) txt(l,PYX,PYY[i],{mono:1,size:14,c:i===4?C.req:C.ink,b:i===4}); });
+  if(st.i!=null&&t<A.done){ const e=E(st.i,t); [[0,0.6,2.0],[1,2.0,3.4],[2,3.4,4.6]].forEach(([r,a,b])=>{ if(e>=a&&e<b){ const p=elPos(r,st.i); g.strokeStyle=C.f[r]; g.lineWidth=2; g.beginPath(); g.roundRect(p.x0-1,PYY[r]-12,p.w+2,24,4); g.stroke(); } }); }
+  // くり返し
+  const LY=282; txt("くり返し",PYX,LY,{b:1,size:15,c:C.svt});
+  txt(t>=A.count?"count が 4 なので i は 0 → 3":"(count はまだない)",PYX+76,LY,{size:14,b:t>=A.count,c:t>=A.count?C.res:"#9AA3AF"});
+  let ci=null; if(t>=A.loop&&t<A.done){ const i=curItem(t); ci=i===0?0:i-1+ease(cl(E(i,t)/0.4)); }
+  for(let i=0;i<4;i++){ const cx=60+i*100, cur=ci!=null&&Math.round(ci)===i, done=(t>=A.done)||(ci!=null&&i<Math.round(ci));
+    if(i<3){ g.strokeStyle=C.line; g.lineWidth=1.5; g.beginPath(); g.moveTo(cx+15,LY+30); g.lineTo(cx+85,LY+30); g.stroke(); }
+    g.fillStyle=done?"#E3E7EE":"#fff"; g.beginPath(); g.arc(cx,LY+30,14,0,7); g.fill(); g.strokeStyle=C.line; g.lineWidth=1.5; g.stroke();
+    txt(String(i),cx,LY+31,{mono:1,size:14,align:"center",c:C.sub}); txt(NAMES[i],cx,LY+54,{size:12,align:"center",c:cur?C.ink:C.sub,b:cur}); }
+  if(ci!=null){ const cx=60+ci*100; g.strokeStyle=C.bad; g.lineWidth=3.5; g.beginPath(); g.arc(cx,LY+30,16,0,7); g.stroke(); }
+  // テンプレート
+  rr(8,350,448,394,10,"#fff",C.svs,2.5); txt("templates/items.html",TX,372,{b:1,size:16,c:C.svt}); if(!(t>=A.pass&&t<A.tstart+0.4)) txt("テンプレート(穴あきの HTML)",448,372,{size:12,c:C.sub,align:"right"});
+  st.tp.forEach(i=>{ g.save(); g.setLineDash([8,6]); g.lineDashOffset=-RT*30; g.strokeStyle=C.svs; g.lineWidth=2; g.strokeRect(TX-12,TPY(i)-11,436,22); g.restore(); g.globalAlpha=PULSE(); g.fillStyle=C.hl; g.fillRect(TX-10,TPY(i)-10,432,20); g.globalAlpha=1; });
+  TP.forEach((l,i)=>{ const jj=[2,7,9,11,14].includes(i); txt(tpl(i),TX,TPY(i),{mono:1,size:i===1?12:13.5,c:jj?C.res:((i<2||i===15)?C.sub:C.ink),b:i===2||i===14}); });
+  st.badge.forEach(b=>chip(b.s,TX+330,TPY(b.l),b.c,{size:13}));
+  if(st.loop){ const e=E(st.i,t), a=cl((e-4.6)/0.1); g.globalAlpha=a; arrow(TX+414,TPY(14),TX+414,TPY(2)+4,C.bad,3,TX+430,(TPY(14)+TPY(2))/2); txt("次の i へ",TX+404,TPY(8),{b:1,size:13,c:C.bad,align:"right"}); g.globalAlpha=1; }
+  // できあがる HTML
+  rr(8,752,448,148,10,"#fff","#6B7280",2.5); OBJ2D.documentFile(g,28,774,0.33,{text:"HTML"});
+  txt(t>=A.done+0.5?"できあがった HTML":"サーバーの中で組み立て中の HTML",44,774,{b:1,size:14,c:C.svt});
+  const lines=["","","","","","",""]; ws.forEach(w=>{ if(t>=w.t) lines[w.line]+=w.s; });
+  const last=ws.filter(w=>t>=w.t).pop();
+  lines.forEach((l,j)=>{ if(!l) return; const nw=last&&last.line===j&&t<last.t+0.6; if(nw){ g.fillStyle=C.hl; g.fillRect(14,HL(j)-7,436,14); } txt(l,HX,HL(j),{mono:1,size:11.5,c:nw?C.ink:C.sub,b:nw}); });
+  // ターミナル
+  rr(8,910,448,36,8,"#1E2430",null);
+  if(t>=A.res+0.2){ g.globalAlpha=cl((t-A.res-0.2)/0.3); txt('127.0.0.1 - - [日時] "GET /items HTTP/1.1" 200 -',20,928,{mono:1,size:12.5,c:"#E7EDF5"}); g.globalAlpha=1; }
+  else txt("ターミナル(記録はレスポンスを返したときに出る)",20,928,{size:12,c:"#8A94A3"});
+  // render_template で渡す
+  if(t>=A.pass&&t<A.tstart+0.4){ const k=ease(cl((t-A.pass-0.2)/1.0)), a=1-cl((t-A.tstart)/0.4); g.globalAlpha=a;
+    ["names","prices","stocks","count"].forEach((n,j)=>{ const x=lerp(300+j*20,TX+190+j*68,k), y=lerp(PYY[8+(j>1?1:0)],372,k)-Math.sin(k*Math.PI)*50; chip(n,x,y,j<3?C.f[j]:C.res,{size:12,mono:1}); });
+    g.globalAlpha=1; }
+  // 値がリストからテンプレートの行へ
+  if(st.i!=null&&t<A.done){ const i=st.i, e=E(i,t);
+    [[0,0.6,4],[1,2.0,5],[2,3.4,7]].forEach(([r,a,l])=>{ const k=ease(cl((e-a)/0.7)); if(e<a||e>a+0.75) return; const p=elPos(r,i);
+      const x=lerp(p.x,BADGEX,k), y=lerp(PYY[r],TPY(l),k)-Math.sin(k*Math.PI)*40; chip(r===0?NAMES[i]:String(r===1?PRICES[i]:S[i]),x,y,C.f[r],{size:13}); }); }
+  // テンプレートの行から HTML へ
+  ws.forEach(w=>{ const k=ease(cl((t-(w.t-0.45))/0.45)); if(t<w.t-0.45||t>=w.t) return;
+    const before=ws.filter(v=>v.line===w.line&&v.t<w.t).map(v=>v.s).join(""); g.font=`700 11.5px ${MONO}`;
+    const ex=HX+g.measureText(before).width+g.measureText(w.s).width/2, sx0=TX+120, sy0=TPY(w.from), cx=TX+340, cy=(sy0+HL(w.line))/2, u=1-k, x=u*u*sx0+2*u*k*cx+k*k*ex, y=u*u*sy0+2*u*k*cy+k*k*HL(w.line);
+    chip(w.s,x,y,C.svt,{size:11,mono:1}); });
+}
+function drawFlowP(t){ const gm=g; g=FG; const cols=4, w=(FC.width-16)/cols;
+  g.fillStyle="#EEF1F5"; g.fillRect(0,0,FC.width,FC.height);
+  const cur=FLOW.reduce((k,f,i)=>t>=f[1]?i:k,0);
+  FLOW.forEach((f,i)=>{ const x=8+(i%cols)*w, y=30+Math.floor(i/cols)*52, on=i===cur, done=i<cur, col=f[2]==="q"?C.req:f[2]==="r"?C.res:f[2]==="s"?C.svs:C.brs;
+    rr(x+3,y-19,w-18,38,9,on?col:(done?"#fff":"#F7F8FA"),on?col:(done?col:C.line),on?3:1.5);
+    if(on){ g.save(); g.setLineDash([8,6]); g.lineDashOffset=-RT*40; g.strokeStyle=col; g.lineWidth=2.5; g.beginPath(); g.roundRect(x-1,y-23,w-10,46,11); g.stroke(); g.restore(); }
+    txt((i+1)+" "+f[0],x+3+(w-18)/2,y,{size:12,b:on||done,c:on?"#fff":(done?col:"#9AA3AF"),align:"center"});
+    if(i%cols<cols-1){ g.fillStyle=done?col:C.line; g.beginPath(); g.moveTo(x+w-13,y-6); g.lineTo(x+w-5,y); g.lineTo(x+w-13,y+6); g.closePath(); g.fill(); } });
+  g=gm; }
+function renderP(t){
+  g.fillStyle="#F9FBFD"; g.fillRect(0,0,W,H);
+  const L=layP(t), f=L.f;
+  // サーバー(上)
+  g.save(); g.beginPath(); g.rect(0,0,W,H-56*cl(f*1.2)); g.clip();
+  g.save(); g.translate(L.sx,L.sy); g.scale(L.ss,L.ss); drawServerP(t,WS); g.restore();
+  label("サーバー(Flask)",L.sx+SWP*L.ss/2,L.sy,C.svs);
+  // 札:パスが一致 / items() を呼ぶ
+  if(t>=A.route+0.6&&t<A.call){ const a=cl((t-A.route-0.6)/0.3); g.globalAlpha=a; const x=L.sx+(PYX+tw('@app.route("/items")',{mono:1,size:14,b:1})+14)*L.ss, y=L.sy+PYY[4]*L.ss;
+    arrow(x+60,y,x+4,y,C.req,3); chip("GET /items",x+112,y,C.req,{size:13,mono:1}); txt("パスが同じ",x+112,y+26,{b:1,size:13,c:C.req,align:"center"}); g.globalAlpha=1; }
+  if(t>=A.call-0.2&&t<A.data){ const a=cl((t-A.call+0.2)/0.3); g.globalAlpha=a; const y=L.sy+PYY[5]*L.ss;
+    const x2=L.sx+(PYX+tw("def items():",{mono:1,size:14})+14)*L.ss; arrow(x2+60,y,x2+4,y,C.req,3); txt("Flask が items() を呼ぶ",x2+68,y,{b:1,size:14,c:C.req}); g.globalAlpha=1; }
+  g.restore();
+  // ブラウザ(下)
+  const strip=cl((f-0.75)/0.2);
+  if(strip<1){ g.globalAlpha=1-strip; g.save(); g.translate(L.bx,L.by); g.scale(L.bs,L.bs); drawBrowser(t); g.restore();
+    label("ブラウザ(クライアント)",W/2,L.by,C.brs); g.globalAlpha=1; }
+  if(strip>0){ g.globalAlpha=strip; rr(8,H-48,W-16,40,8,C.br,C.brs,2); txt("ブラウザ:127.0.0.1:5000/items(返事を待っている…)",20,H-28,{size:13,c:C.sub}); g.globalAlpha=1; }
+  // リクエスト(下→上)
+  const sBot=L.sy+SHP*L.ss, top=L.by-8;
+  if(t>=A.go&&t<A.route+0.8){ let x,y;
+    if(t<A.arrive){ const k=ease(cl((t-A.go)/(A.arrive-A.go))); x=W/2; y=lerp(top-30,sBot+34,k); }
+    else if(t<A.route){ x=W/2; y=sBot+34; }
+    else { const k=ease(cl((t-A.route)/0.6)); x=lerp(W-90,L.sx+(PYX+300)*L.ss,k); y=lerp(H/2,L.sy+PYY[4]*L.ss,k); }
+    const a=t<A.arrive?1:t<A.route?1-cl((t-A.arrive)/0.3):(t>A.route+0.5?1-cl((t-A.route-0.5)/0.3):cl((t-A.route)/0.2));
+    if(t<A.arrive){ g.strokeStyle="rgba(201,119,42,.4)"; g.lineWidth=6; g.beginPath(); g.moveTo(W/2,top); g.lineTo(W/2,y+20); g.stroke(); txt("リクエスト ↑",W/2+70,(top+sBot)/2,{b:1,size:15,c:C.req}); }
+    g.globalAlpha=a; OBJ2D.packet(g,x,y,1.0,{t,text:"GET /items",color:C.req}); g.fillStyle=C.req; g.beginPath(); g.moveTo(x-11,y-24); g.lineTo(x,y-38); g.lineTo(x+11,y-24); g.fill(); g.globalAlpha=1; }
+  // レスポンス(上→下)
+  if(t>=A.zb1&&t<A.arriveB+0.3){ const k=ease(cl((t-A.zb1)/(A.arriveB-A.zb1))), y=lerp(sBot+30,top-40,k), a=t>A.arriveB?1-cl((t-A.arriveB)/0.3):1;
+    g.strokeStyle="rgba(31,58,95,.35)"; g.lineWidth=6; g.beginPath(); g.moveTo(W/2,sBot); g.lineTo(W/2,y-20); g.stroke();
+    txt("↓ レスポンス",W/2-90,(top+sBot)/2,{b:1,size:15,c:C.res,align:"right"});
+    g.globalAlpha=a; OBJ2D.packet(g,W/2,y,1.0,{t,text:"200 OK + HTML",color:C.res}); g.fillStyle=C.res; g.beginPath(); g.moveTo(W/2-11,y+24); g.lineTo(W/2,y+38); g.lineTo(W/2+11,y+24); g.fill(); g.globalAlpha=1; }
+  drawFlowP(t);
+}
+function render(t){ return P?renderP(t):renderL(t); }
 // 字幕(場面の時刻 c で書く)。再生では、字幕を読み終えられるように場面ごとに時間を延ばす
 const EVENTS=[
   {t:0,text:"URL 欄に <code>127.0.0.1:5000/items</code> と入力して Enter。"},

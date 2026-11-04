@@ -1,4 +1,6 @@
-const cv=document.getElementById("c"), W=cv.width, H=cv.height; let g=cv.getContext("2d"); const FG=document.getElementById("flow").getContext("2d");
+const cv=document.getElementById("c"), FCV=document.getElementById("flow"); let W=cv.width, H=cv.height; let g=cv.getContext("2d"); const FG=FCV.getContext("2d");
+// 画面の幅が狭いとき(スマホ)は縦長の配置にする:サーバー=上・ブラウザ=下
+const MQ=matchMedia("(max-width:700px)"); let P=false;
 const UI='"Yu Gothic UI","Yu Gothic","Meiryo","Hiragino Sans","Noto Sans JP",sans-serif', MONO='Consolas,Menlo,"Courier New",monospace';
 const NOLABEL=new URLSearchParams(location.search).has("nolabel");
 const COL={req:"#C9772A",res:"#1F3A5F",br:"#DCE6F2",brs:"#2F6FB2",sv:"#FFF1E0",svs:"#C9772A",svt:"#6B3A0A",ink:"#1E2430",sub:"#4A5568",line:"#B8C2CF",ok:"#1E6B45",hl:"rgba(255,208,138,.75)"};
@@ -36,11 +38,13 @@ const FIELDS=[
 const TAGS=[{txt:"customer=パイソン太郎",row:0,line:2,t:T.cust},{txt:"item=2",row:1,line:3,t:T.item},{txt:"qty=3",row:2,line:4,t:T.qty},
   {txt:"delivery=1",row:3,line:6,t:T.del},{txt:"option=0",row:4,line:8,t:T.sel},{txt:"option=2",row:4,line:8,t:T.sel+0.15}];
 // ---------- app.py(実際のコード) ----------
-const CODE=['@app.route("/confirm", methods=["POST"])','def confirm():','    customer = request.form["customer"]','    item = int(request.form["item"])','    qty = int(request.form["qty"])',
+const CODE_L=['@app.route("/confirm", methods=["POST"])','def confirm():','    customer = request.form["customer"]','    item = int(request.form["item"])','    qty = int(request.form["qty"])',
  '    subtotal = prices[item] * qty','    d = int(request.form["delivery"])','    fee = delivery_fees[d]','    selected = request.form.getlist("option")','    option_names = []','    option_total = 0',
  '    for v in selected:','        j = int(v)','        option_names.append(options[j])','        option_total = option_total + option_prices[j]','    total = subtotal + fee + option_total',
  '    return render_template("confirm.html", customer=customer,','        name=names[item], price=prices[item], qty=qty,','        subtotal=subtotal, delivery=deliveries[d], fee=fee,','        option_names=option_names, option_count=len(option_names),','        option_total=option_total, total=total)'];
-const CX=28, CY=i=>124+i*24.5, CF=15, RF=14;
+const CODE_P=CODE_L.slice(0,16).concat(['    return render_template("confirm.html",','        customer=customer, name=names[item],','        price=prices[item], qty=qty,','        subtotal=subtotal,',
+ '        delivery=deliveries[d], fee=fee,','        option_names=option_names,','        option_count=len(option_names),','        option_total=option_total, total=total)']);
+let CODE=CODE_L, CX=28, CY=i=>124+i*24.5, CF=15, RF=14;
 // 行の右に出る値(t から表示。to があれば t2 で書き換わる)
 const BADGES=[
   {l:2,t:T.cust+0.8,s:"'パイソン太郎'",n:"(文字列)",c:FC[0]},
@@ -62,7 +66,7 @@ function curLines(t){
   for(const [a,b,l] of R) if(t>=a&&t<b) return l;
   if(t>=T.loop&&t<T.total){ const e=(t-T.loop)%1.6; return e<0.4?[11]:e<0.8?[12]:e<1.2?[13]:[14]; }
   if(t>=T.total&&t<T.ret) return [15];
-  if(t>=T.ret&&t<T.done) return [16,17,18,19,20];
+  if(t>=T.ret&&t<T.done) return CODE.slice(16).map((_,k)=>16+k);
   return []; }
 // ---------- confirm.html ----------
 const PH=[
@@ -73,7 +77,13 @@ const TPL=[["<h1>注文内容の確認</h1>"],["<p>",0," 様</p>"],["<th>商品<
   ["<th>小計</th><td>",4,"円</td>"],["<th>受け取り方法</th><td>",5],["  (送料 ",6,"円)</td>"],["<th>オプション</th><td>"],"OPT",["<th>合計</th><td>",8,"円</td>"]];
 const OPT_SRC=["{% if option_count == 0 %}なし","{% else %}<ul>","{% for o in option_names %}","  <li>{{ o }}</li>","{% endfor %}</ul>{% endif %}</td>"];
 const OPT_OUT=["<ul><li>ギフト包装</li>","<li>領収書</li></ul></td>"];
-const TX=676, TF=14.5;
+let TX=676, TF=14.5;
+const PSRC=[[17,"customer=customer"],[17,"name=names[item]"],[18,"price=prices[item]"],[18,"qty=qty"],[19,"subtotal=subtotal"],[20,"delivery=deliveries[d]"],[20,"fee=fee"],[21,"option_names=option_names"],[23,"total=total"]];
+function applyMode(){ P=MQ.matches;
+  cv.width=P?480:1280; cv.height=P?900:846; W=cv.width; H=cv.height; FCV.width=P?480:1280; FCV.height=P?112:74;
+  cv.classList.toggle("portrait",P); FCV.classList.toggle("portrait",P);
+  if(P){ CODE=CODE_P; CX=14; CY=i=>152+i*21; CF=12; RF=12; TX=18; TF=13; } else { CODE=CODE_L; CX=28; CY=i=>124+i*24.5; CF=15; RF=14; TX=676; TF=14.5; } }
+applyMode(); MQ.addEventListener("change",applyMode);
 // ---------- ブラウザの中(元の座標で描き、外で縮める) ----------
 function drawBrowser(t){
   g.save(); g.translate(-28,-110);
@@ -160,7 +170,7 @@ function drawFlow(t){ const gm=g; g=FG; const y=37, x0=20, w=(W-40)/FLOW.length;
     txt((i+1)+" "+f[0],x+4+(w-26)/2,y,{size:14.5,b:on||done,c:on?"#fff":(done?col:"#9AA3AF"),align:"center"});
     if(i<FLOW.length-1){ g.fillStyle=done?col:COL.line; g.beginPath(); g.moveTo(x+w-19,y-7); g.lineTo(x+w-8,y); g.lineTo(x+w-19,y+7); g.closePath(); g.fill(); } }); g=gm; }
 // ---------- まとめて描く ----------
-function render(t,fx){
+function renderL(t,fx){
   FT=t+(fx?fx.e:0);
   g.fillStyle="#F9FBFD"; g.fillRect(0,0,W,H);
   const L=lay(t);
@@ -189,6 +199,106 @@ function render(t,fx){
   drawFlow(t);
   if(fx){ const h=fx.hold, F=VIZPLAYER.FX; F.ripple(g,h.x,h.y,fx,h.c,0.7); F.flash(g,h.x,h.y,fx,80); F.callout(g,h.cx??640,h.cy??742,h.lines,fx,h.c,{size:20,below:true}); }
 }
+
+// ---------- 縦長(スマホ)の配置 ----------
+const SWP=464, SHP=1180, TPY0=722;
+function camP(t){ return 462*ease(cl((t-T.ret+0.3)/0.8)); }
+function layP(t){ const f=focus(t), ss=lerp(0.15,1,f), bs=lerp(0.95,0.1,f);
+  return {f, ss, sx:lerp((W-SWP*0.15)/2,8,f), sy:lerp(22,30-camP(t)*f,f), bs, bx:(W-BW0*bs)/2, by:H-8-BH0*bs}; }
+function drawBandP(t){ const a=cl((t-T.z1)/0.4); REQPOS=[];
+  g.globalAlpha=a; rr(4,8,456,88,8,"#FFF8EE",COL.req,2);
+  txt("届いた POST /confirm の中身(request.form)",14,26,{b:1,size:13,c:COL.req}); txt("値はすべて文字列",452,26,{b:1,size:12,c:COL.req,align:"right"});
+  let x=14, row=0;
+  TAGS.forEach((tg,k)=>{ const w=tw(tg.txt,{mono:1,b:1,size:12})+18; if(x+w>452){ x=14; row++; } const y=54+row*28; REQPOS[k]={x:x+w/2,y};
+    const ak=cl((t-T.z1-0.15-k*0.12)/0.3); g.globalAlpha=a*ak; chip(tg.txt,x+w/2,y-(1-ak)*10,FC[FIELDS[tg.row].c],{size:12,mono:1}); g.globalAlpha=a; x+=w+6; });
+  g.globalAlpha=1; }
+let TPLPOS=[];
+function drawServerP(t){
+  rr(0,0,SWP,SHP,12,COL.sv,COL.svs,3);
+  drawBandP(t); rr(4,104,456,554,10,"#fff",COL.svs,2.5); txt("app.py",CX,124,{b:1,size:15,c:COL.svt}); txt("Python のプログラム(confirm 関数)",CX+58,124,{size:12,c:COL.sub});
+  curLines(t).forEach(i=>{ g.fillStyle=COL.hl; g.fillRect(8,CY(i)-10,448,20); });
+  CODE.forEach((l,i)=>txt(l,CX,CY(i),{mono:1,size:CF,c:i===0?COL.req:COL.ink,b:i===0&&t>=T.call&&t<T.cust}));
+  BADGES.forEach(b=>{ if(t<b.t) return; if(b.l===12&&t>=T.total) return; const two=b.t2!=null&&t>=b.t2; let s=two?b.s2:b.s; if(b.l===13) s=s.replace(/, /g,",");
+    const a=cl((t-(two?b.t2:b.t))/0.3), x=CX+tw(CODE[b.l],{mono:1,size:CF})+10, sz=b.l===13?11.5:12;
+    g.globalAlpha=a; g.font=`700 ${sz}px ${MONO}`; const w=g.measureText("→ "+s).width;
+    g.fillStyle="#fff"; g.fillRect(x-4,CY(b.l)-10,w+8,20); g.fillStyle=b.c+"18"; g.fillRect(x-4,CY(b.l)-10,w+8,20);
+    txt("→ "+s,x,CY(b.l),{mono:1,b:1,size:sz,c:two&&b.n2.includes("int")?COL.ok:b.c}); g.globalAlpha=1; });
+  SRCPOS=PH.map((p,k)=>{ const [l,frag]=PSRC[k], i=CODE[l].indexOf(frag); return {x:CX+tw(CODE[l].slice(0,i),{mono:1,size:RF})+tw(frag,{mono:1,size:RF})/2, y:CY(l), w:tw(frag,{mono:1,size:RF})}; });
+  if(t>=T.ret&&t<T.done) PH.forEach((p,k)=>{ if(t>=phT(k)-0.1&&t<phT(k)+0.6){ const s=SRCPOS[k]; g.strokeStyle=p.c; g.lineWidth=2.5; g.beginPath(); g.roundRect(s.x-s.w/2-3,s.y-10,s.w+6,20,4); g.stroke(); } });
+  // confirm.html
+  const done=t>=T.done;
+  rr(4,668,456,500,10,"#fff",done?"#6B7280":COL.svs,2.5);
+  if(done) OBJ2D.documentFile(g,TX+6,690,0.32,{text:"HTML"});
+  txt(done?"できあがった HTML":"templates/confirm.html",done?TX+20:TX,690,{b:1,size:15,c:COL.svt});
+  txt(done?"{{ }} はもう残っていない":"テンプレート(穴あきの HTML)",452,690,{size:12,c:done?COL.ok:COL.sub,b:done,align:"right"});
+  let y=TPY0; PHPOS=[]; TPLPOS=[];
+  TPL.forEach(line=>{
+    if(line==="OPT"){ const ti=phT(7), k=cl((t-ti-0.45)/0.35);
+      if(k<1){ g.globalAlpha=1-k; OPT_SRC.forEach((l,j)=>txt("  "+l,TX,y+j*24,{mono:1,size:11.5,c:j===3?PH[7].c:"#5A6578",b:j===3})); PHPOS[7]={x:TX+90,y:y+3*24}; }
+      if(k>0){ g.globalAlpha=k; OPT_OUT.forEach((l,j)=>{ g.fillStyle="rgba(179,38,30,.10)"; g.fillRect(TX-2,y+j*28-11,280,22); txt("  "+l,TX,y+j*28,{mono:1,size:12.5,b:1,c:PH[7].c}); }); }
+      g.globalAlpha=1; y+=OPT_SRC.length*24*(1-k)+OPT_OUT.length*28*k+6; return; }
+    let x=TX; const yy=y; TPLPOS.push(yy);
+    line.forEach(seg=>{ if(typeof seg==="string"){ x+=txt(seg,x,yy,{mono:1,size:TF}); return; }
+      const ph=PH[seg], ti=phT(seg)+0.45, k=cl((t-ti)/0.3), w0=tw("{{ "+ph.n+" }}",{mono:1,size:TF,b:1});
+      PHPOS[seg]={x:x+w0/2,y:yy};
+      if(k<1){ g.globalAlpha=1-k; if(t>=phT(seg)-0.1&&t<ti+0.3){ g.fillStyle=COL.hl; g.fillRect(x-2,yy-10,w0+4,20); } txt("{{ "+ph.n+" }}",x,yy,{mono:1,size:TF,b:1,c:ph.c}); g.globalAlpha=1; }
+      const w2=tw(ph.v,{size:14,b:1});
+      if(k>0){ g.globalAlpha=k; g.fillStyle=ph.c+"22"; g.fillRect(x-2,yy-10,w2+4,20); txt(ph.v,x,yy,{size:14,b:1,c:ph.c}); g.globalAlpha=1; }
+      x+=w0*(1-k)+(w2+2)*k; });
+    y+=30; });
+  txt("※ <table>・<tr> と字下げは省略して表示",TX,SHP-28,{size:12,c:COL.sub});
+  if(t>=T.tpl&&t<T.done) PH.forEach((p,k)=>{ const a=phT(k), e=t-a; if(e<0||e>0.5) return; const s=SRCPOS[k], d=PHPOS[k]; if(!d) return;
+    const kk=ease(e/0.45), x=lerp(s.x,d.x,kk), yy=lerp(s.y,d.y,kk)-Math.sin(kk*Math.PI)*50; chip(p.v,x,yy,p.c,{size:13}); });
+}
+function drawFlowP(t){ const gm=g; g=FG; const cols=4, w=(FCV.width-16)/cols;
+  g.fillStyle="#EEF1F5"; g.fillRect(0,0,FCV.width,FCV.height);
+  const cur=FLOW.reduce((k,f,i)=>t>=f[1]?i:k,0);
+  FLOW.forEach((f,i)=>{ const x=8+(i%cols)*w, y=30+Math.floor(i/cols)*52, on=i===cur, done=i<cur, col=f[2]==="q"?COL.req:f[2]==="r"?COL.res:f[2]==="s"?COL.svs:COL.brs;
+    rr(x+3,y-19,w-18,38,9,on?col:(done?"#fff":"#F7F8FA"),on?col:(done?col:COL.line),on?3:1.5);
+    if(on){ g.save(); g.setLineDash([8,6]); g.lineDashOffset=-FT*40; g.strokeStyle=col; g.lineWidth=2.5; g.beginPath(); g.roundRect(x-1,y-23,w-10,46,11); g.stroke(); g.restore(); }
+    const lab=(i+1)+" "+f[0]; txt(lab,x+3+(w-18)/2,y,{size:tw(lab,{size:12,b:1})>w-24?10.5:12,b:on||done,c:on?"#fff":(done?col:"#9AA3AF"),align:"center"});
+    if(i%cols<cols-1){ g.fillStyle=done?col:COL.line; g.beginPath(); g.moveTo(x+w-13,y-6); g.lineTo(x+w-5,y); g.lineTo(x+w-13,y+6); g.closePath(); g.fill(); } });
+  g=gm; }
+function holdPoint(h,L){ const s=(x,y)=>({x:L.sx+x*L.ss,y:L.sy+y*L.ss}), [x,k]=h.pl;
+  if(k==="br") return {x:L.bx+(240)*L.bs, y:L.by+(320)*L.bs};
+  if(k[0]==="c") return s(x,CY(+k.slice(1)));
+  if(k==="p1") return s(x,TPLPOS[2]||TPY0+60);
+  return s(x,TPY0+170); }
+function renderP(t,fx){
+  FT=t+(fx?fx.e:0);
+  g.fillStyle="#F9FBFD"; g.fillRect(0,0,W,H);
+  const L=layP(t), f=L.f;
+  g.save(); g.beginPath(); g.rect(0,0,W,H-56*cl(f*1.2)); g.clip();
+  g.save(); g.translate(L.sx,L.sy); g.scale(L.ss,L.ss); drawServerP(t); g.restore();
+  label("サーバー(Flask)",L.sx+SWP*L.ss/2,L.sy,COL.svs);
+  TAGS.forEach((tg,k)=>{ const e=t-tg.t; if(e<0||e>0.85||!REQPOS[k]) return; const sp=REQPOS[k], d={x:CX+tw(CODE[tg.line],{mono:1,size:CF})+40,y:CY(tg.line)};
+    const kk=ease(e/0.8), x=L.sx+lerp(sp.x,d.x,kk)*L.ss, y=L.sy+(lerp(sp.y,d.y,kk)-Math.sin(kk*Math.PI)*40)*L.ss; g.globalAlpha=1-cl((e-0.7)/0.15); chip(tg.txt,x,y,FC[FIELDS[tg.row].c],{size:12,mono:1}); g.globalAlpha=1; });
+  if(t>=T.call&&t<T.cust){ const px=L.sx+(CX+tw(CODE[1],{mono:1,size:CF})+12)*L.ss, py=L.sy+CY(1)*L.ss; g.globalAlpha=cl((t-T.call)/0.3); arrow(px+60,py,px+4,py,COL.req); txt("Flask が confirm() を呼ぶ",px+68,py,{b:1,size:14,c:COL.req}); g.globalAlpha=1; }
+  g.restore();
+  // ブラウザ(下)
+  const strip=cl((f-0.75)/0.2);
+  if(strip<1){ g.globalAlpha=1-strip; g.save(); g.translate(L.bx,L.by); g.scale(L.bs,L.bs); drawBrowser(t); g.restore(); label("ブラウザ(クライアント)",W/2,L.by,COL.brs); g.globalAlpha=1; }
+  if(strip>0){ g.globalAlpha=strip; rr(8,H-48,W-16,40,8,COL.br,COL.brs,2); txt("ブラウザ:127.0.0.1:5000/order(返事を待っている…)",20,H-28,{size:13,c:COL.sub}); g.globalAlpha=1; }
+  // 入力欄から name=値 の札ができ、POST /confirm にまとまって上へ
+  const sBot=L.sy+SHP*L.ss, top=L.by-10, gx=W/2, gy=top-34;
+  if(t>=T.tags&&t<T.arrive+0.05){
+    if(t>=T.gather){ let py=gy; if(t>=T.go){ const k=ease(cl((t-T.go)/(T.arrive-T.go))); py=lerp(gy,sBot+30,k); }
+      const a=t>T.arrive-0.5?1-cl((t-T.arrive+0.5)/0.5):cl((t-T.gather)/0.4); g.globalAlpha=a;
+      if(t>=T.go){ g.strokeStyle="rgba(201,119,42,.4)"; g.lineWidth=6; g.beginPath(); g.moveTo(gx,top); g.lineTo(gx,py+20); g.stroke(); txt("リクエスト ↑",gx+86,(top+sBot)/2,{b:1,size:15,c:COL.req}); }
+      OBJ2D.packet(g,gx,py,1.0,{t,text:"POST /confirm",color:COL.req}); g.fillStyle=COL.req; g.beginPath(); g.moveTo(gx-11,py-24); g.lineTo(gx,py-38); g.lineTo(gx+11,py-24); g.fill(); g.globalAlpha=1; }
+    TAGS.forEach((tg,k)=>{ const nx=(tg.row===4?(k===5?340:150):(tg.row===0?330:340))+4, ny=ROWY[tg.row]+28;
+      const fx0=L.bx+(nx-28)*L.bs, fy=L.by+(ny-110)*L.bs;
+      const gk=ease(cl((t-T.gather)/0.6)), a=cl((t-T.tags)/0.3)*(1-cl((t-T.gather-0.4)/0.3)); if(a<=0) return;
+      g.globalAlpha=a; chip(tg.txt,lerp(fx0,gx,gk),lerp(fy,gy,gk),FC[FIELDS[tg.row].c],{size:13,mono:1}); g.globalAlpha=1; }); }
+  // レスポンス(上→下)
+  if(t>=T.zb1&&t<T.arriveB+0.3){ const k=ease(cl((t-T.zb1)/(T.arriveB-T.zb1))), y=lerp(sBot+30,top-40,k), a=t>T.arriveB?1-cl((t-T.arriveB)/0.3):1;
+    g.strokeStyle="rgba(31,58,95,.35)"; g.lineWidth=6; g.beginPath(); g.moveTo(W/2,sBot); g.lineTo(W/2,y-20); g.stroke();
+    txt("↓ レスポンス",W/2-90,(top+sBot)/2,{b:1,size:15,c:COL.res,align:"right"});
+    g.globalAlpha=a; OBJ2D.packet(g,W/2,y,1.0,{t,text:"200 OK + HTML",color:COL.res}); g.fillStyle=COL.res; g.beginPath(); g.moveTo(W/2-11,y+24); g.lineTo(W/2,y+38); g.lineTo(W/2+11,y+24); g.fill(); g.globalAlpha=1; }
+  drawFlowP(t);
+  if(fx){ const h=fx.hold, F=VIZPLAYER.FX, p=holdPoint(h,L); F.ripple(g,p.x,p.y,fx,h.c,0.5); F.flash(g,p.x,p.y,fx,60); F.callout(g,p.x,p.y,h.lines,fx,h.c,{size:14,below:p.y<H*0.55}); }
+}
+function render(t,fx){ return P?renderP(t,fx):renderL(t,fx); }
 const EVENTS=[
   {t:0,text:"フォームに入力して「確認画面へ」を押す。"},
   {t:T.tags,text:"入力欄ごとに <b>name=値</b> の組ができる。名前は入力欄の <code>name</code>。チェックしなかった「カード」の組はできない。"},
@@ -215,13 +325,13 @@ const EVENTS=[
 // ヒットストップの位置(サーバー注目時の画面座標)
 const G=(x,y)=>({x:166+x,y:TOP+y});
 const HOLDS=[
-  {t:T.call+0.3,...G(300,CY(0)),c:"#F2B36B",lines:["Flask:POST /confirm を受信","中身は name=値 の組。値はすべて文字列"]},
-  {t:T.item+1.5,...G(380,CY(3)),c:"#7FD49B",lines:["届いた '2' は文字列。int() で整数 2 にする","整数にすると prices[item] のように番号で使える"]},
-  {t:T.sel+1.1,...G(470,CY(8)),c:"#F2928A",lines:["getlist:同じ name の値をまとめてリストに","チェックしなかった「カード」の値は送られない"]},
-  {t:T.total+0.6,...G(470,CY(15)),c:"#9DBBE3",lines:["合計 840 円:計算は Python 側で済ませる","テンプレートには結果だけを渡して表示する"]},
-  {t:phT(1)+0.8,...G(TX+170,130+2*34),c:"#F2B36B",lines:["{{ name }} → 消しゴム","render_template の name=names[item] の値が入る"]},
-  {t:T.done+0.3,...G(TX+180,360),c:"#7FD49B",lines:["サーバーの中で HTML が完成","{{ }} は残らず、ただの HTML になった"]},
-  {t:T.show+0.6,x:240,y:420,c:"#9DBBE3",lines:["確認画面:色が同じ所に同じ値","「合計 840円」は {{ total }}円 が置き換わったもの"]},
+  {pl:[300,"c0"],t:T.call+0.3,...G(300,CY(0)),c:"#F2B36B",lines:["Flask:POST /confirm を受信","中身は name=値 の組。値はすべて文字列"]},
+  {pl:[300,"c3"],t:T.item+1.5,...G(380,CY(3)),c:"#7FD49B",lines:["届いた '2' は文字列。int() で整数 2 にする","整数にすると prices[item] のように番号で使える"]},
+  {pl:[360,"c8"],t:T.sel+1.1,...G(470,CY(8)),c:"#F2928A",lines:["getlist:同じ name の値をまとめてリストに","チェックしなかった「カード」の値は送られない"]},
+  {pl:[340,"c15"],t:T.total+0.6,...G(470,CY(15)),c:"#9DBBE3",lines:["合計 840 円:計算は Python 側で済ませる","テンプレートには結果だけを渡して表示する"]},
+  {pl:[200,"p1"],t:phT(1)+0.8,...G(TX+170,130+2*34),c:"#F2B36B",lines:["{{ name }} → 消しゴム","render_template の name=names[item] の値が入る"]},
+  {pl:[220,"tm"],t:T.done+0.3,...G(TX+180,360),c:"#7FD49B",lines:["サーバーの中で HTML が完成","{{ }} は残らず、ただの HTML になった"]},
+  {pl:[0,"br"],t:T.show+0.6,x:240,y:420,c:"#9DBBE3",lines:["確認画面:色が同じ所に同じ値","「合計 840円」は {{ total }}円 が置き換わったもの"]},
 ];
 
 // ---- 試す(入力を変えて確かめる) ----

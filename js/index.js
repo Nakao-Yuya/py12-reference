@@ -71,3 +71,10 @@ function badge(x,y,n,c){return `<circle cx="${x}" cy="${y}" r="11" fill="${C[c||
   f.addEventListener("submit",ev=>{ ev.preventDefault(); show(false); });
   show(true);
 })();
+
+// スマホでは表を縦に積むので、各セルに見出し(列の名前)を持たせておく
+document.querySelectorAll("table.t").forEach(tb=>{
+  const head=[...tb.querySelectorAll("tr:first-child th")].map(th=>th.textContent.trim());
+  if(!head.length) return;
+  tb.querySelectorAll("tr").forEach((tr,i)=>{ if(i===0) return; [...tr.children].forEach((td,k)=>{ if(head[k]) td.setAttribute("data-label",head[k]); }); });
+});
