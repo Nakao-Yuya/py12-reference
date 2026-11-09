@@ -1,0 +1,13 @@
+# 公開しないもの(念のため)
+CLAUDE.md
+CLAUDE.local.md
+*.docx
+*.pdf
+*.xlsx
+*.pptx
+*.zip
+backup/
+_作業/
+.claude/
+Thumbs.db
+desktop.ini
